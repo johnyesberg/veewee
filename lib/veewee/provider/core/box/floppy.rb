@@ -2,6 +2,14 @@ module Veewee
   module Provider
     module Core
       module BoxCommand
+        def cygpath(s)
+          `/bin/cygpath -w #{s}`.chomp
+        end
+
+	def escape(s)
+          s.gsub('\\','\\\\\\\\')
+        end
+
         def create_floppy(filename)
           # Todo Check for java
           # Todo check output of commands
@@ -20,7 +28,9 @@ module Veewee
               env.logger.info "Removing previous floppy file"
               FileUtils.rm(floppy_file)
             end
-            command="java -jar #{javacode_dir}/dir2floppy.jar \"#{temp_dir}\" \"#{floppy_file}\""
+            jar_file=File.join(javacode_dir,"dir2floppy.jar")
+            command="java -jar #{escape(cygpath(jar_file))} \"#{escape(cygpath(temp_dir))}\" \"#{escape(cygpath(floppy_file))}\""
+            ui.info("Creating floppy: #{command}")
             shell_exec("#{command}")
           end
         end
